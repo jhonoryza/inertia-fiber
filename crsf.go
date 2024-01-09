@@ -44,13 +44,5 @@ func CSRFWithConfig(config CSRFConfig) fiber.Handler {
 		config.CookiePath = DefaultCSRFConfig.CookiePath
 	}
 
-	return func(c *fiber.Ctx) error {
-		if config.Next != nil && config.Next(c) {
-			return c.Next()
-		}
-
-		csrf.New(csrf.Config(config))
-
-		return c.Next()
-	}
+	return csrf.New(csrf.Config(config))
 }
