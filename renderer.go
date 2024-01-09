@@ -17,7 +17,7 @@ type Renderer interface {
 	Render(io.Writer, string, map[string]interface{}, *Inertia) error
 }
 
-// HTMLRenderer is a html/template renderer for Echo framework with inertia.js.
+// HTMLRenderer is a html/template renderer for Fiber framework with inertia.js.
 type HTMLRenderer struct {
 	templates   *template.Template
 	Debug       bool
