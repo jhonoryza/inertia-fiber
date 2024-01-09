@@ -176,6 +176,8 @@ func (i *Inertia) renderHTML(code int, name string, data map[string]interface{})
 	if err := i.renderer.Render(buf, name, data, i); err != nil {
 		return err
 	}
+
+	i.c.Set("Content-type", "text/html; charset=utf-8")
 	return i.c.Status(code).Send(buf.Bytes())
 }
 
