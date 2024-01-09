@@ -16,7 +16,7 @@ const (
 )
 
 type Inertia struct {
-	c             fiber.Ctx
+	c             *fiber.Ctx
 	rootView      string
 	sharedProps   map[string]interface{}
 	version       VersionFunc
