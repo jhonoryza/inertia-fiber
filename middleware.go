@@ -12,7 +12,7 @@ const (
 )
 
 type MiddlewareConfig struct {
-	Skipper *fiber.Ctx
+	Next func(c *fiber.Ctx) bool
 	// The root template that's loaded on the first page visit.
 	// see https://inertiajs.com/server-side-setup#root-template
 	RootView string
@@ -31,7 +31,7 @@ type MiddlewareConfig struct {
 type SharedDataFunc func(c *fiber.Ctx) (map[string]interface{}, error)
 
 var DefaultMiddlewareConfig = MiddlewareConfig{
-	Skipper:       nil,
+	Next:          nil,
 	RootView:      "app.html",
 	VersionFunc:   defaultVersionFunc(),
 	Share:         nil,
@@ -71,16 +71,16 @@ func Get(c *fiber.Ctx) (*Inertia, error) {
 	return in, nil
 }
 
-func Middleware(r Renderer) error {
+func Middleware(r Renderer) fiber.Handler {
 	return MiddlewareWithConfig(MiddlewareConfig{
 		Renderer: r,
 	})
 }
 
-func MiddlewareWithConfig(config MiddlewareConfig) error {
+func MiddlewareWithConfig(config MiddlewareConfig) fiber.Handler {
 	// Defaults
-	if config.Skipper == nil {
-		config.Skipper = DefaultMiddlewareConfig.Skipper
+	if config.Next == nil {
+		config.Next = DefaultMiddlewareConfig.Next
 	}
 	if config.RootView == "" {
 		config.RootView = DefaultMiddlewareConfig.RootView
@@ -89,18 +89,24 @@ func MiddlewareWithConfig(config MiddlewareConfig) error {
 		config.VersionFunc = DefaultMiddlewareConfig.VersionFunc
 	}
 
-	var sharedProps map[string]interface{}
-	in := &Inertia{
-		c:             &fiber.Ctx{},
-		rootView:      config.RootView,
-		sharedProps:   sharedProps,
-		version:       config.VersionFunc,
-		renderer:      config.Renderer,
-		isSsrDisabled: config.IsSsrDisabled,
+	return func(c *fiber.Ctx) error {
+		if config.Next != nil && config.Next(c) {
+			return c.Next()
+		}
+
+		var sharedProps map[string]interface{}
+		in := &Inertia{
+			c:             c,
+			rootView:      config.RootView,
+			sharedProps:   sharedProps,
+			version:       config.VersionFunc,
+			renderer:      config.Renderer,
+			isSsrDisabled: config.IsSsrDisabled,
+		}
+
+		c.Locals(key, in)
+
+		return c.Next()
 	}
-
-	config.Skipper.Locals(key, in)
-
-	return nil
 
 }
