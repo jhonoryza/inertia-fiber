@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -37,12 +38,44 @@ type HTMLRenderer struct {
 	SsrEngine SsrEngine
 }
 
-func NewRenderer() *HTMLRenderer {
+// isRunningHot returns true if running in hot mode.
+func isRunningHot() bool {
+	filename := hotFile()
+	if filename == "" {
+		return false
+	}
+
+	_, err := os.Stat(filename)
+
+	return !os.IsNotExist(err)
+}
+
+// hotFile returns the hot file path.
+func hotFile() string {
+	return filepath.Join("public", "hot")
+}
+
+// hotUrl returns the hot url.
+func hotUrl() string {
+	data, err := os.ReadFile(hotFile())
+	if err != nil {
+		panic(err)
+	}
+
+	return strings.TrimSuffix(string(data), "\n")
+}
+
+func NewRenderer(containerId string) *HTMLRenderer {
+	debugMode := isRunningHot()
+	viteUrl := "http://localhost:5173"
+	if debugMode {
+		viteUrl = hotUrl()
+	}
 	r := &HTMLRenderer{
-		Debug:            false,
-		ContainerId:      "app",
+		Debug:            debugMode,
+		ContainerId:      containerId,
 		Vite:             true,
-		ViteDevServerURL: "http://localhost:5173",
+		ViteDevServerURL: viteUrl,
 		ViteBasePath:     "/",
 		ViteDisableReact: false,
 		ViteEntryPoints:  []string{},
