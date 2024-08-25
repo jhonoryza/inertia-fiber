@@ -1,4 +1,4 @@
-module github.com/satria-research/inertia-fiber
+module github.com/jhonoryza/inertia-fiber
 
 go 1.19
 
