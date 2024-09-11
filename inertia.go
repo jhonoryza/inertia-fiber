@@ -61,6 +61,8 @@ func (i *Inertia) Share(props map[string]interface{}) {
 	i.mu.Lock()
 	defer i.mu.Unlock()
 
+	i.sharedProps = make(map[string]interface{})
+
 	// merge shared props
 	for k, v := range props {
 		i.sharedProps[k] = v
@@ -233,4 +235,12 @@ func Render(c *fiber.Ctx, code int, component string, props map[string]interface
 
 func RenderWithViewData(c *fiber.Ctx, code int, component string, props, viewData map[string]interface{}) error {
 	return MustGet(c).RenderWithViewData(code, component, props, viewData)
+}
+
+func RedirectToRoute(c *fiber.Ctx, url string, props map[string]interface{}) error {
+	return MustGet(c).RedirectToRoute(url, props)
+}
+
+func (i *Inertia) RedirectToRoute(url string, props map[string]interface{}) error {
+	return i.c.RedirectToRoute(url, props)
 }
