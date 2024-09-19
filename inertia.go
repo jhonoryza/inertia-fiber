@@ -95,15 +95,14 @@ func (i *Inertia) Version() string {
 
 // Location generates 409 response for external redirects
 // see https://inertiajs.com/redirects#external-redirects
-func (i *Inertia) Location(url string) error {
+func (i *Inertia) Location(url string, code int) error {
 	if i.c.Get(HeaderXInertia) != "" {
 		res := i.c.Response()
 		res.Header.Set(HeaderXInertiaLocation, url)
 		res.Header.SetStatusCode(fiber.StatusConflict)
 		return nil
-	} else {
-		return i.c.Redirect(url, fiber.StatusNotFound)
 	}
+	return i.c.Redirect(url, code)
 }
 
 func (i *Inertia) Render(code int, component string, props map[string]interface{}) error {
@@ -225,8 +224,8 @@ func Version(c *fiber.Ctx) string {
 	return MustGet(c).Version()
 }
 
-func Location(c *fiber.Ctx, url string) error {
-	return MustGet(c).Location(url)
+func Location(c *fiber.Ctx, url string, code int) error {
+	return MustGet(c).Location(url, code)
 }
 
 func Render(c *fiber.Ctx, code int, component string, props map[string]interface{}) error {
@@ -237,10 +236,16 @@ func RenderWithViewData(c *fiber.Ctx, code int, component string, props, viewDat
 	return MustGet(c).RenderWithViewData(code, component, props, viewData)
 }
 
-func RedirectToRoute(c *fiber.Ctx, url string, props map[string]interface{}) error {
-	return MustGet(c).RedirectToRoute(url, props)
+func Redirect(c *fiber.Ctx, code int, url string, props map[string]interface{}) error {
+	return MustGet(c).Redirect(url, code, props)
 }
 
-func (i *Inertia) RedirectToRoute(url string, props map[string]interface{}) error {
-	return i.c.RedirectToRoute(url, props)
+func (i *Inertia) Redirect(url string, code int, props map[string]interface{}) error {
+	if i.c.Get(HeaderXInertia) != "" {
+		res := i.c.Response()
+		res.Header.Set(HeaderXInertiaLocation, url)
+		res.Header.SetStatusCode(fiber.StatusConflict)
+		return nil
+	}
+	return i.c.RedirectToRoute(url, props, code)
 }
