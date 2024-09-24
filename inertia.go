@@ -241,7 +241,7 @@ func Redirect(c *fiber.Ctx, url string, props map[string]interface{}) error {
 }
 
 func (i *Inertia) Redirect(url string, props map[string]interface{}) error {
-	return i.c.Redirect(url, 302)
+	return i.c.Redirect(url, fiber.StatusFound)
 }
 
 func RedirectToRoute(c *fiber.Ctx, routeName string, props map[string]interface{}) error {
@@ -249,5 +249,5 @@ func RedirectToRoute(c *fiber.Ctx, routeName string, props map[string]interface{
 }
 
 func (i *Inertia) RedirectToRoute(routeName string, props map[string]interface{}) error {
-	return i.c.RedirectToRoute(routeName, props, 302)
+	return i.c.RedirectToRoute(routeName, props, fiber.StatusFound)
 }
