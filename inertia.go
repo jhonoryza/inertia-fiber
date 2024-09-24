@@ -236,16 +236,18 @@ func RenderWithViewData(c *fiber.Ctx, code int, component string, props, viewDat
 	return MustGet(c).RenderWithViewData(code, component, props, viewData)
 }
 
-func Redirect(c *fiber.Ctx, code int, url string, props map[string]interface{}) error {
-	return MustGet(c).Redirect(url, code, props)
+func Redirect(c *fiber.Ctx, url string, props map[string]interface{}) error {
+	return MustGet(c).Redirect(url, props)
 }
 
-func (i *Inertia) Redirect(url string, code int, props map[string]interface{}) error {
-	if i.c.Get(HeaderXInertia) != "" {
-		res := i.c.Response()
-		res.Header.Set(HeaderXInertiaLocation, url)
-		res.Header.SetStatusCode(fiber.StatusConflict)
-		return nil
-	}
-	return i.c.RedirectToRoute(url, props, code)
+func (i *Inertia) Redirect(url string, props map[string]interface{}) error {
+	return i.c.Redirect(url, 302)
+}
+
+func RedirectToRoute(c *fiber.Ctx, routeName string, props map[string]interface{}) error {
+	return MustGet(c).RedirectToRoute(routeName, props)
+}
+
+func (i *Inertia) RedirectToRoute(routeName string, props map[string]interface{}) error {
+	return i.c.RedirectToRoute(routeName, props, 302)
 }
